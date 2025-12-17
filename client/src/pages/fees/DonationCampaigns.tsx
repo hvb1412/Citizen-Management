@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
-  Edit,
   Plus,
   X,
   Save,
   Loader,
-  DollarSign,
 } from "lucide-react";
 
 interface DonationRecord {

@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Link as LinkIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Household } from "@/types/household";
 

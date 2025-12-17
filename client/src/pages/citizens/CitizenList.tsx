@@ -108,7 +108,7 @@ export default function CitizenList() {
   const [filterGender, setFilterGender] = useState<"all" | "Nam" | "Nữ">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCitizen, setSelectedCitizen] = useState<Citizen | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   // Filter & Sort
   const filteredCitizens = useMemo(() => {
@@ -160,9 +160,6 @@ export default function CitizenList() {
     setSelectedCitizen(null);
   };
 
-  const getAge = (dateOfBirth: string) => {
-    return new Date().getFullYear() - new Date(dateOfBirth).getFullYear();
-  };
 
   return (
     <div className="flex gap-6 h-full">

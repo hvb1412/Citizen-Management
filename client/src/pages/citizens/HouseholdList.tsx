@@ -238,7 +238,7 @@ export default function HouseholdList() {
   const [selectedHousehold, setSelectedHousehold] = useState<Household | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const isLoading = false;
 
   // Filter & Sort
   const filteredHouseholds = useMemo(() => {
@@ -373,7 +373,7 @@ export default function HouseholdList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedHouseholds.map((household, idx) => (
+                    {paginatedHouseholds.map((household) => (
                       <tr
                         key={household.id}
                         className="border-b border-second/20 dark:border-second/20 hover:bg-second/5 dark:hover:bg-second/10 transition cursor-pointer"

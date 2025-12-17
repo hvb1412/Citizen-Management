@@ -6,7 +6,6 @@ import {
   Menu,
   LayoutDashboard,
   Users,
-  Home as HomeIcon,
   FileText,
   HandCoins,
   Settings,

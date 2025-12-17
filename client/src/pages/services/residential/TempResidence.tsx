@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle, Loader } from "lucide-react";
+import { Loader } from "lucide-react";
 
 interface FormData {
   // Section 1: Thông tin người khai báo
