@@ -16,9 +16,9 @@ function MiniThemeToggle() {
       className="
         mt-8 mx-auto block
         w-12 h-12 rounded-full
-        bg-third text-first
+        bg-primary text-primary-foreground
         flex items-center justify-center
-        shadow-md hover:shadow-lg hover:bg-third/90
+        shadow-md hover:shadow-lg hover:bg-primary/90
         transition active:scale-95 font-bold
       "
       aria-label="Chuyển đổi chế độ sáng/tối"
@@ -63,15 +63,16 @@ export default function Login() {
       <div className="absolute inset-0 bg-first/70" aria-hidden="true" />
       <div className="flex flex-col w-full items-center relative z-10">
 
+
         
-        <a className="flex items-center mb-6 text-2xl font-semibold text-first dark:text-fourth">
+        <a className="flex items-center mb-6 text-2xl font-semibold text-foreground">
           Hệ thống quản lý nhân khẩu
         </a>
 
         {/* FORM */}
-<div className="w-[380px] text-left rounded-2xl p-8 border border-second/40 shadow-lg bg-transparent backdrop-blur-md dark:border-second/30">
+<div className="w-[380px] text-left rounded-2xl p-8 border border-border shadow-lg bg-card text-card-foreground backdrop-blur-md">
 
-          <p className="font-bold text-first dark:text-fourth mb-4" style={{ fontSize: '1.5rem' }}>
+          <p className="font-bold text-foreground mb-4" style={{ fontSize: '1.5rem' }}>
             Đăng nhập hệ thống
           </p>
 
@@ -79,12 +80,12 @@ export default function Login() {
             
             {/* Username */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-first dark:text-fourth">
+              <label className="block mb-2 text-sm font-medium text-foreground">
                 Tên đăng nhập
               </label>
               <input
                 type="text"
-                className="input-theme w-full rounded-lg p-2.5 placeholder:text-second dark:placeholder:text-fourth/40"
+                className="input-theme w-full rounded-lg p-2.5 placeholder:text-muted-foreground"
                 placeholder="Nhập tên đăng nhập"
                 value={form.username}
                 onChange={(e) =>
@@ -95,12 +96,12 @@ export default function Login() {
 
             {/* Password */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-first dark:text-fourth">
+              <label className="block mb-2 text-sm font-medium text-foreground">
                 Mật khẩu
               </label>
               <input
                 type="password"
-                className="input-theme w-full rounded-lg p-2.5 placeholder:text-second dark:placeholder:text-fourth/40"
+                className="input-theme w-full rounded-lg p-2.5 placeholder:text-muted-foreground"
                 placeholder="••••••••"
                 value={form.password}
                 onChange={(e) =>
@@ -123,9 +124,9 @@ export default function Login() {
               Đăng nhập
             </button>
 
-            <p className="text-sm text-second dark:text-fourth/70 text-center pt-2">
+            <p className="text-sm text-muted-foreground text-center pt-2">
               Quên mật khẩu?{" "}
-              <span className="text-third cursor-pointer hover:underline">
+              <span className="text-primary cursor-pointer hover:underline">
                 Liên hệ tổ trưởng
               </span>
             </p>
@@ -138,3 +139,8 @@ export default function Login() {
     </section>
   );
 }
+
+
+
+
+

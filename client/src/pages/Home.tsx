@@ -35,6 +35,7 @@ export default function Home() {
           Citizen Management System
         </h1>
 
+
         <div className="flex flex-col items-center justify-center gap-8">
           <button
             onClick={() => navigate("/login")}
@@ -54,3 +55,8 @@ export default function Home() {
     </div>
   );
 }
+
+
+
+
+
