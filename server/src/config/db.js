@@ -24,6 +24,7 @@ function getPool() {
         console.log("🟢 PostgreSQL pool created");
     }
     return pool;
+  }
 }
 
 export default getPool;
