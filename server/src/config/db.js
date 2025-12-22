@@ -25,6 +25,5 @@ function getPool() {
     }
     return pool;
   }
-}
 
 export default getPool;
