@@ -2,11 +2,10 @@ import { Op } from "sequelize";
 import db from "../models/index.js";
 import personEventService from "./personEventService.js";
 
-// ✅ Import đầy đủ các models
 const Person = db.Person;
 const Household = db.Household;
-const HouseholdMembership = db.HouseholdMembership; // ✅ PHẢI CÓ DÒNG NÀY
-const HouseholdHistory = db.HouseholdHistory; // ✅ THÊM DÒNG NÀY
+const HouseholdMembership = db.HouseholdMembership; 
+const HouseholdHistory = db.HouseholdHistory; 
 const PersonEvent = db.PersonEvent;
 
 const getAllNhanKhau = async ({
