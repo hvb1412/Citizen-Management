@@ -23,6 +23,8 @@ import authController from "../controllers/authController.js";
 import userController from "../controllers/userController.js";
 // --- SEARCH CONTROLLER ---
 import searchController from "../controllers/searchController.js";
+// --- FEE CONTROLLER ---
+import feeController from "../controllers/feeController.js";
 
 // --- CHECK TOKEN ---
 import verifyToken from "../middleware/authMiddleware.js";
@@ -161,6 +163,12 @@ let initWebRoutes = (app) => {
     checkRole(["admin"]),
     handlePersonEvent
   );
+
+  // QUẢN LÝ KHOẢN THU (Admin/Accountant)
+  router.post("/api/v1/khoan-thu", verifyToken, checkRole(['admin', 'accountant']), feeController.handleCreateFee);
+  router.get("/api/v1/khoan-thu", verifyToken, checkRole(['admin', 'accountant']), feeController.handleGetAllFees);
+  // Xóa khoản thu (Dùng để xóa rác khi test API)
+  router.delete("/api/v1/khoan-thu/:id", verifyToken, checkRole(['admin', 'accountant']), feeController.handleDeleteFee);
 
   // --- Tìm kiếm linh hoạt ---
   // GET: Admin hay Accountant đều dùng được
