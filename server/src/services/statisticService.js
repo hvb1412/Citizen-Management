@@ -3,6 +3,8 @@ import { Op } from "sequelize";
 
 const Person = db.Person;
 const Household = db.Household;
+const FeeRate = db.FeeRate;
+const Payment = db.Payment;
 
 // Hàm phụ trợ: Tính mốc ngày sinh từ số tuổi
 // Ví dụ: Muốn tìm người 6 tuổi, lấy ngày hiện tại trừ đi 6 năm
@@ -118,6 +120,73 @@ const getDashboardStats = async () => {
   };
 };
 
+const getFeeCollectionReport = async (rateId) => {
+  // 1. Kiểm tra khoản thu có tồn tại không
+  const feeRate = await FeeRate.findByPk(rateId);
+  if (!feeRate) {
+    throw new Error("Khoản thu không tồn tại!");
+  }
+
+  // 2. Thực hiện các phép tính toán tổng hợp (Aggregation)
+  // Dùng Promise.all để chạy song song
+  const [
+    totalExpected, // Tổng tiền CẦN thu
+    totalCollected, // Tổng tiền ĐÃ thu (bao gồm cả nộp một phần)
+    countPaid, // Số hộ đã hoàn thành
+    countPartial, // Số hộ đang nộp dở dang
+    countPending, // Số hộ chưa nộp đồng nào
+  ] = await Promise.all([
+    Payment.sum("total_amount", { where: { rate_id: rateId } }),
+    Payment.sum("paid_amount", { where: { rate_id: rateId } }),
+    Payment.count({ where: { rate_id: rateId, payment_status: "paid" } }),
+    Payment.count({ where: { rate_id: rateId, payment_status: "partial" } }),
+    Payment.count({ where: { rate_id: rateId, payment_status: "pending" } }),
+  ]);
+
+  // 3. Lấy danh sách các hộ CHƯA hoàn thành (Pending + Partial)
+  // Để kế toán in danh sách đi thu tiền
+  const unpaidHouseholds = await Payment.findAll({
+    where: {
+      rate_id: rateId,
+      payment_status: { [Op.ne]: "paid" },
+    },
+    include: [
+      {
+        model: Household,
+        as: "household",
+        attributes: ["household_no", "address"],
+      },
+    ],
+    attributes: ["total_amount", "paid_amount", "payment_status"],
+    order: [["household_id", "ASC"]],
+  });
+
+  // Format lại danh sách hộ nợ
+  const formattedUnpaidList = unpaidHouseholds.map((p) => ({
+    household_no: p.household.household_no,
+    address: p.household.address,
+    must_pay: parseInt(p.total_amount),
+    paid: parseInt(p.paid_amount),
+    debt: parseInt(p.total_amount) - parseInt(p.paid_amount), // Số tiền còn nợ
+    status: p.payment_status, // 'pending' hoặc 'partial'
+  }));
+
+  return {
+    tenKhoanThu: feeRate.item_type,
+    tongSoTienCanThu: totalExpected || 0,
+    tongSoTienDaThu: totalCollected || 0,
+    tienDoHoanThanh: countPaid,
+    soHoChuaNop: countPending + countPartial, // Gộp cả chưa nộp và nộp thiếu
+    chiTietTrangThai: {
+      daNopDu: countPaid,
+      nopThieu: countPartial,
+      chuaNop: countPending,
+    },
+    danhSachHoChuaNop: formattedUnpaidList,
+  };
+};
+
 export default {
   getDashboardStats,
+  getFeeCollectionReport
 };

@@ -273,8 +273,20 @@ let initWebRoutes = (app) => {
   );
 
   //GET: Thống kê Dashboard
-  router.get("/api/v1/so-lieu/tong-quan", verifyToken, checkRole(['admin']), statisticController.getDashboard);
+  router.get(
+    "/api/v1/so-lieu/tong-quan",
+    verifyToken,
+    checkRole(["admin"]),
+    statisticController.getDashboard
+  );
 
+  // GET: Báo cáo thu phí (Chi tiết theo từng khoản)
+  router.get(
+    "/api/v1/so-lieu/thu-phi/:id",
+    verifyToken,
+    checkRole(["admin", "accountant"]),
+    statisticController.getFeeReport
+  );
 
   return app.use("/", router);
 };
