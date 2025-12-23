@@ -204,7 +204,7 @@ const getPaymentList = async (queryParams) => {
         as: "household",
         where: Object.keys(householdWhere).length > 0 ? householdWhere : null,
         required: Object.keys(householdWhere).length > 0,
-        attributes: []
+        attributes: [],
       },
     ],
   });
@@ -218,9 +218,65 @@ const getPaymentList = async (queryParams) => {
   };
 };
 
+const markPaymentAsPaid = async (data) => {
+  const {
+    payment_id, // ID của phiếu thu (Bắt buộc)
+    amount, // Số tiền thực nộp (Có thể khác số tiền dự kiến nếu nộp thiếu/thừa)
+    payment_method, // 'Cash', 'Transfer'...
+    date, // Ngày nộp
+    note, // Ghi chú thêm
+  } = data;
+
+  // 1. Tìm bản ghi phiếu thu
+  const payment = await Payment.findByPk(payment_id);
+
+  if (!payment) {
+    throw new Error("Phiếu thu không tồn tại!");
+  }
+
+  // 2. Kiểm tra trạng thái hiện tại
+  if (payment.payment_status === "paid") {
+    throw new Error("Hộ này đã nộp khoản phí này rồi!");
+  }
+
+  // 3. Tính toán số tiền
+  const currentPaid = parseFloat(payment.paid_amount); // Tiền đã đóng trước đó (VD: 0)
+  const incomingAmount = parseFloat(amount); // Tiền mới đóng (VD: 100k)
+  const totalDebt = parseFloat(payment.total_amount); // Tổng phải đóng (VD: 360k)
+
+  // Tổng tiền sau khi đóng lần này
+  const newPaidAmount = currentPaid + incomingAmount;
+
+  // 4. Xác định trạng thái mới
+  let newStatus = payment.payment_status;
+
+  if (newPaidAmount >= totalDebt) {
+    // Nếu đóng đủ hoặc thừa -> PAID
+    newStatus = "paid";
+  } else {
+    // Nếu vẫn còn thiếu -> PARTIAL
+    newStatus = "partial";
+  }
+
+  // 5. Cập nhật vào DB
+  await payment.update({
+    payment_status: newStatus,
+    paid_amount: newPaidAmount, // Cập nhật tổng tiền đã đóng
+    payment_method: payment_method || "Cash",
+    date: new Date(), // Cập nhật ngày đóng gần nhất
+    note: note || payment.note, // Giữ note cũ hoặc ghi đè
+  });
+
+  return {
+    ...payment.toJSON(),
+    remaining_amount: totalDebt - newPaidAmount, // Trả về số tiền còn nợ để FE hiển thị
+  };
+};
+
 export default {
   createFeeWave,
   getAllFeeWaves,
   deleteFeeWave,
   getPaymentList,
+  markPaymentAsPaid,
 };
