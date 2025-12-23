@@ -288,6 +288,14 @@ let initWebRoutes = (app) => {
     statisticController.getFeeReport
   );
 
+  // GET: Báo cáo đóng góp tự nguyện
+  router.get(
+    "/api/v1/so-lieu/dong-gop/:id",
+    verifyToken,
+    checkRole(["admin", "accountant"]),
+    statisticController.getDonationReport
+  );
+
   return app.use("/", router);
 };
 

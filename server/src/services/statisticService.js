@@ -5,6 +5,8 @@ const Person = db.Person;
 const Household = db.Household;
 const FeeRate = db.FeeRate;
 const Payment = db.Payment;
+const Campaign = db.Campaign;
+const CampaignPayment = db.CampaignPayment;
 
 // Hàm phụ trợ: Tính mốc ngày sinh từ số tuổi
 // Ví dụ: Muốn tìm người 6 tuổi, lấy ngày hiện tại trừ đi 6 năm
@@ -186,7 +188,54 @@ const getFeeCollectionReport = async (rateId) => {
   };
 };
 
+const getDonationReport = async (campaignId) => {
+  // 1. Kiểm tra đợt vận động có tồn tại không
+  const campaign = await Campaign.findByPk(campaignId);
+  if (!campaign) {
+    throw new Error("Đợt vận động không tồn tại!");
+  }
+
+  // 2. Tính toán tổng hợp (Aggregation)
+  // Chạy song song để lấy Tổng tiền và Số hộ tham gia
+  const [totalCollected, countParticipants] = await Promise.all([
+    CampaignPayment.sum("amount", { where: { campaign_id: campaignId } }),
+    CampaignPayment.count({ where: { campaign_id: campaignId } }),
+  ]);
+
+  // 3. Lấy danh sách chi tiết các hộ đã đóng góp
+  // Sắp xếp theo số tiền đóng góp giảm dần (ai đóng nhiều lên đầu) để vinh danh
+  const donors = await CampaignPayment.findAll({
+    where: { campaign_id: campaignId },
+    include: [
+      {
+        model: Household,
+        as: "household",
+        attributes: ["household_no", "address"], // Lấy thông tin hộ
+      },
+    ],
+    order: [["amount", "DESC"]], // Sắp xếp giảm dần theo số tiền
+    attributes: ["amount", "contribution_date", "note"],
+  });
+
+  // Format lại dữ liệu cho gọn gàng
+  const formattedDonors = donors.map((d) => ({
+    household_no: d.household.household_no,
+    address: d.household.address,
+    amount: parseInt(d.amount),
+    date: d.contribution_date,
+    note: d.note,
+  }));
+
+  return {
+    tenDotVanDong: campaign.name,
+    tongTienThuDuoc: totalCollected || 0,
+    soHoThamGia: countParticipants,
+    danhSachDongGop: formattedDonors,
+  };
+};
+
 export default {
   getDashboardStats,
-  getFeeCollectionReport
+  getFeeCollectionReport,
+  getDonationReport
 };
