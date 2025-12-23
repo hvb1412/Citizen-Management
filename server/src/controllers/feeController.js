@@ -71,9 +71,42 @@ const handleGetPayments = async (req, res) => {
   }
 };
 
+const handleConfirmPayment = async (req, res) => {
+  try {
+    // Lấy dữ liệu từ body
+    const { payment_id, amount, payment_method, note} = req.body;
+
+    if(!payment_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng cung cấp ID phiếu thu (payment_id)"
+      });
+    }
+
+    const updatedPayment = await feeService.markPaymentAsPaid({
+      payment_id,
+      amount,
+      payment_method,
+      note
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Xác nhận nộp tiền thành công!",
+      data: updatedPayment
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 export default {
   handleCreateFee,
   handleGetAllFees,
   handleDeleteFee,
-  handleGetPayments
+  handleGetPayments,
+  handleConfirmPayment
 };
