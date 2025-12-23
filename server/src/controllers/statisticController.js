@@ -18,6 +18,33 @@ const getDashboard = async (req, res) => {
   }
 };
 
+const getFeeReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if(!id) {
+            return res.status(400).json({
+                success: false,
+                messsage: "Thiếu ID khoản thu"
+            });
+        }
+
+        const data = await statisticService.getFeeCollectionReport(id);
+
+        return res.status(200).json({
+            success: true,
+            message: "Lấy báo cáo thu phí thành công",
+            data: data
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi báo cáo: " + error.message
+        });
+    }
+};
+
 export default {
   getDashboard,
+  getFeeReport
 };
