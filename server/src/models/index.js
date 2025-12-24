@@ -6,72 +6,72 @@ import Sequelize from "sequelize";
 import process from "process";
 import "dotenv/config";
 
+// Import file config.js mới tạo
+import allConfigs from "../config/config.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 const basename = path.basename(__filename);
+
+// Xác định môi trường (mặc định là development)
 const env = process.env.NODE_ENV || "development";
 
-// Import config.json
-import configFile from "../config/config.json" with { type: "json" };
-const config = configFile[env];
-
-if (process.env.DB_USER) {
-    console.log("🔄 Đang dùng cấu hình từ .env cho Sequelize Models...");
-    config.username = process.env.DB_USER;
-    config.password = process.env.DB_PASSWORD;
-    config.database = process.env.DB_NAME;
-    config.host = process.env.DB_HOST;
-    config.port = process.env.DB_PORT;
-    config.dialect = "postgres";
-    
-    // Bắt buộc bật SSL cho Supabase
-    config.dialectOptions = {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false
-        }
-    };
-}
+// Lấy cấu hình tương ứng với môi trường
+const config = allConfigs[env];
 
 const db = {};
 
 let sequelize;
+
+console.log(`🔄 Đang kết nối Database ở chế độ: ${env}`);
+
 if (config.use_env_variable) {
-    sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  // Trường hợp dùng connection string (thường cho Production trên Heroku/Railway)
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-    sequelize = new Sequelize(
-        config.database,
-        config.username,
-        config.password,
-        config
-    );
+  // Trường hợp dùng từng biến lẻ (Development hoặc Production thông thường)
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  );
 }
+
+// Kiểm tra kết nối (Optional - giúp debug dễ hơn)
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("✅ Kết nối Database thành công.");
+  })
+  .catch((err) => {
+    console.error("❌ Không thể kết nối Database:", err);
+  });
 
 // Đọc các file models
 const files = fs.readdirSync(__dirname).filter((file) => {
-    return (
-        file.indexOf(".") !== 0 &&
-        file !== basename &&
-        file.slice(-3) === ".js" &&
-        file.indexOf(".test.js") === -1
-    );
+  return (
+    file.indexOf(".") !== 0 &&
+    file !== basename &&
+    file.slice(-3) === ".js" &&
+    file.indexOf(".test.js") === -1
+  );
 });
 
-// Import models động với ES6
+// Import models động
 for (const file of files) {
-    const filePath = path.join(__dirname, file);
-    const fileUrl = `file:///${filePath.replace(/\\/g, "/")}`;
-    const modelModule = await import(fileUrl);
-    const model = modelModule.default(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
+  const filePath = path.join(__dirname, file);
+  const fileUrl = `file:///${filePath.replace(/\\/g, "/")}`;
+  const modelModule = await import(fileUrl);
+  const model = modelModule.default(sequelize, Sequelize.DataTypes);
+  db[model.name] = model;
 }
 
 // Thiết lập associations
 Object.keys(db).forEach((modelName) => {
-    if (db[modelName].associate) {
-        db[modelName].associate(db);
-    }
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
 });
 
 db.sequelize = sequelize;
